@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 services:
   # --- 1. TRAEFIK (ROUTER) ---
@@ -11,7 +11,7 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
     ports:
-      - "80:80"     # Web HTTP
+      - "80:80" # Web HTTP
       - "8080:8080" # Dashboard
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
@@ -20,7 +20,7 @@ services:
 
   # --- 2. BACKEND (PYTHON) ---
   backend:
-    image: username_dockerhub/my-local-backend:latest
+    image: anggoro2711/my-local-backend:latest
     container_name: backend_app
     restart: unless-stopped
     networks:
@@ -36,7 +36,7 @@ services:
 
   # --- 3. FRONTEND (NEXT.JS) ---
   frontend:
-    image: username_dockerhub/my-local-frontend:latest
+    image: anggoro2711/my-local-frontend:latest
     container_name: frontend_app
     restart: unless-stopped
     networks:
