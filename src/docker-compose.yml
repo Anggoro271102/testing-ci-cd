@@ -1,0 +1,65 @@
+version: '3'
+
+services:
+  # --- 1. TRAEFIK (ROUTER) ---
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"     # Web HTTP
+      - "8080:8080" # Dashboard
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - local-net
+
+  # --- 2. BACKEND (PYTHON) ---
+  backend:
+    image: username_dockerhub/my-local-backend:latest
+    container_name: backend_app
+    restart: unless-stopped
+    networks:
+      - local-net
+    labels:
+      - "traefik.enable=true"
+      # Domain Backend
+      - "traefik.http.routers.backend.rule=Host(`api.local.test`)"
+      - "traefik.http.routers.backend.entrypoints=web"
+      # Port Python (8000)
+      - "traefik.http.services.backend.loadbalancer.server.port=8000"
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  # --- 3. FRONTEND (NEXT.JS) ---
+  frontend:
+    image: username_dockerhub/my-local-frontend:latest
+    container_name: frontend_app
+    restart: unless-stopped
+    networks:
+      - local-net
+    labels:
+      - "traefik.enable=true"
+      # Domain Frontend
+      - "traefik.http.routers.frontend.rule=Host(`app.local.test`)"
+      - "traefik.http.routers.frontend.entrypoints=web"
+      # Port Next.js (3000) - INI PENTING!
+      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  # --- 4. WATCHTOWER (AUTO UPDATE) ---
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 30 --cleanup
+    environment:
+      - WATCHTOWER_LABEL_ENABLE=true
+
+networks:
+  local-net:
+    name: local-net
