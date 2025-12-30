@@ -29,6 +29,6 @@ jobs:
       - name: Build Frontend
         uses: docker/build-push-action@v4
         with:
-          context: ./src/frontend
+          context: ./src/frontend/src
           push: true
           tags: anggoro2711/my-local-frontend:latest
