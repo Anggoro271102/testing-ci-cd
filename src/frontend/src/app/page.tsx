@@ -10,8 +10,7 @@ export default function Home() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch ke API Backend
-      const res = await fetch("http://api.local.test/api/data");
+      const res = await fetch("http://localhost:8001/api/data");
       const jsonData = await res.json();
       setData(jsonData);
     } catch (error) {
