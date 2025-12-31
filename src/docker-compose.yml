@@ -36,7 +36,7 @@ services:
     volumes:
       # Watchtower biasanya lebih pintar menangani socket windows
       - /var/run/docker.sock:/var/run/docker.sock
-    command: --interval 30 --cleanup
+    command: --interval 30 --cleanup backend_app frontend_app
     environment:
       # --- TAMBAHAN PENTING ---
       # Memaksa Watchtower bicara dengan bahasa API terbaru
