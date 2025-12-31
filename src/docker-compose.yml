@@ -20,7 +20,7 @@ services:
     restart: unless-stopped
     ports:
       # KITA BUKA PORT LANGSUNG KE WINDOWS
-      - "3000:3000"
+      - "3002:3000"
     networks:
       - local-net
     environment:
@@ -37,6 +37,10 @@ services:
       # Watchtower biasanya lebih pintar menangani socket windows
       - /var/run/docker.sock:/var/run/docker.sock
     command: --interval 30 --cleanup
+    environment:
+      # --- TAMBAHAN PENTING ---
+      # Memaksa Watchtower bicara dengan bahasa API terbaru
+      - DOCKER_API_VERSION=1.45
 
 # --- HAPUS SERVICE TRAEFIK ---
 
