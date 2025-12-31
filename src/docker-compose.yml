@@ -25,6 +25,7 @@ services:
       - local-net
     environment:
       # Penting: Agar Next.js tahu dia berjalan di localhost saat fetch di browser
+      - HOSTNAME=0.0.0.0
       - NEXT_PUBLIC_API_URL=http://localhost:8000
 
   # --- 3. WATCHTOWER (AUTO UPDATE) ---
