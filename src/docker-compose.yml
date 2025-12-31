@@ -6,7 +6,7 @@ services:
     restart: unless-stopped
     ports:
       # KITA BUKA PORT LANGSUNG KE WINDOWS
-      - "8000:8000"
+      - "8001:8000"
     networks:
       - local-net
     environment:
