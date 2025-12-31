@@ -1,65 +1,43 @@
-version: "3"
-
 services:
-  # --- 1. TRAEFIK (ROUTER) ---
-  traefik:
-    image: traefik:v2.10
-    container_name: traefik
-    command:
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-    ports:
-      - "80:80" # Web HTTP
-      - "8080:8080" # Dashboard
-    volumes:
-      # Menggunakan Pipa Windows Asli
-      - "\\\\.\\pipe\\docker_engine:/var/run/docker.sock"
-    networks:
-      - local-net
-
-  # --- 2. BACKEND (PYTHON) ---
+  # --- 1. BACKEND (PYTHON) ---
   backend:
     image: anggoro2711/my-local-backend:latest
     container_name: backend_app
     restart: unless-stopped
+    ports:
+      # KITA BUKA PORT LANGSUNG KE WINDOWS
+      - "8000:8000"
     networks:
       - local-net
-    labels:
-      - "traefik.enable=true"
-      # Domain Backend
-      - "traefik.http.routers.backend.rule=Host(`api.local.test`)"
-      - "traefik.http.routers.backend.entrypoints=web"
-      # Port Python (8000)
-      - "traefik.http.services.backend.loadbalancer.server.port=8000"
-      - "com.centurylinklabs.watchtower.enable=true"
+    environment:
+      # Izinkan backend menerima request dari mana saja
+      - ALLOWED_ORIGINS=*
 
-  # --- 3. FRONTEND (NEXT.JS) ---
+  # --- 2. FRONTEND (NEXT.JS) ---
   frontend:
     image: anggoro2711/my-local-frontend:latest
     container_name: frontend_app
     restart: unless-stopped
+    ports:
+      # KITA BUKA PORT LANGSUNG KE WINDOWS
+      - "3000:3000"
     networks:
       - local-net
-    labels:
-      - "traefik.enable=true"
-      # Domain Frontend
-      - "traefik.http.routers.frontend.rule=Host(`app.local.test`)"
-      - "traefik.http.routers.frontend.entrypoints=web"
-      # Port Next.js (3000) - INI PENTING!
-      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
-      - "com.centurylinklabs.watchtower.enable=true"
+    environment:
+      # Penting: Agar Next.js tahu dia berjalan di localhost saat fetch di browser
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
 
-  # --- 4. WATCHTOWER (AUTO UPDATE) ---
+  # --- 3. WATCHTOWER (AUTO UPDATE) ---
+  # Ini tetap kita pakai biar CI/CD tetap jalan
   watchtower:
     image: containrrr/watchtower
     container_name: watchtower
     volumes:
+      # Watchtower biasanya lebih pintar menangani socket windows
       - /var/run/docker.sock:/var/run/docker.sock
     command: --interval 30 --cleanup
-    environment:
-      - WATCHTOWER_LABEL_ENABLE=true
+
+# --- HAPUS SERVICE TRAEFIK ---
 
 networks:
   local-net:
